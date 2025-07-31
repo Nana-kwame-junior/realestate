@@ -160,14 +160,7 @@ If you encounter issues:
 2. **Login:** Access the system through `login.php`
 3. **Navigation:** Use the main interface to manage real estate properties
 
-## 🔒 Security Notes
-
-- Change default database credentials in production
-- Enable proper authentication mechanisms
-- Implement input validation and sanitization
-- Use HTTPS in production environments
-
-## 📄 License
+##  License
 
 This project is for educational/development purposes. Please ensure proper licensing for production use.
 
