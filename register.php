@@ -4,6 +4,7 @@ ini_set('display_errors', 1);
 session_start();
 include('./includes/header.php');
 include('./Database/connection.php');
+include('./includes/toast.php');
 
 $error_message = '';
 $success_message = '';
@@ -32,7 +33,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         if($check->num_rows > 0) {
             $error_message = "Email is already registered. Please use a different email.";
         } else {
-            // let first of all get client role ID
+            // Get client role ID
             $role_query = $conn->prepare("SELECT id FROM roles WHERE role_name = 'client'");
             $role_query->execute();
             $role_result = $role_query->get_result();
@@ -40,14 +41,14 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             $client_role_id = $role_row['id'];
             $role_query->close();
             
-            // Hash password and insert user for his prokenct
+            // Hash password and insert user
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $conn->prepare("INSERT INTO users (first_name, last_name, phone, email, password, role_id) VALUES (?, ?, ?, ?, ?, ?)");
             $stmt->bind_param("sssssi", $fname, $lname, $phone, $email, $hashed_password, $client_role_id);
             
             if($stmt->execute()) {
                 $success_message = "Registration successful! You can now login.";
-                // Clear form data on success afeer error is detercted 
+                // Clear form data on success
                 $_POST = array();
             } else {
                 $error_message = "Registration failed. Please try again. Error: " . $stmt->error;
@@ -60,7 +61,18 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 ?>
 
+<?php renderToastContainer(); ?>
 
+<div class="login-box">
+  <h2>Register an Account</h2>
+  
+  <?php if(!empty($error_message)): ?>
+      <div class="alert alert-danger"><?php echo htmlspecialchars($error_message); ?></div>
+  <?php endif; ?>
+  
+  <?php if(!empty($success_message)): ?>
+      <div class="alert alert-success"><?php echo htmlspecialchars($success_message); ?></div>
+  <?php endif; ?>
   
   <form action="register.php" method="POST" id="registerForm">
     <!-- First Name -->
@@ -101,3 +113,15 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
   </form>
 </div>
 
+<?php 
+  // Render toast script and show messages
+  renderToastScript();
+  
+  if(!empty($error_message)) {
+      showToastMessage($error_message, 'error');
+  }
+  
+  if(!empty($success_message)) {
+      showToastMessage($success_message, 'success');
+  }
+?>

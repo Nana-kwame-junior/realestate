@@ -16,7 +16,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
     if(empty($email) || empty($password)){
         $error_message = "Please fill in all fields";
     } else {
-        // Prepare and execute the query with role information for the prokenct
+        // Prepare and execute the query with role information
         $stmt = $conn->prepare("SELECT u.id, u.email, u.password, u.role_id, r.role_name FROM users u JOIN roles r ON u.role_id = r.id WHERE u.email = ? AND u.is_active = TRUE");
         $stmt->bind_param("s", $email);
         $stmt->execute();
@@ -32,7 +32,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                 $_SESSION['user_id'] = $id;
                 $_SESSION['user_email'] = $db_email;
                 $_SESSION['role_id'] = $role_id;
-                $_SESSION['user_type'] = $role_name; 
+                $_SESSION['user_type'] = $role_name; // Keep for backward compatibility
                 $_SESSION['logged_in'] = true;
                 
                 // Redirect to dashboard
@@ -55,7 +55,13 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
   <div class="login-box">
     <h2>Welcome Back Again!</h2>
     
- 
+    <?php if(!empty($error_message)): ?>
+        <div class="alert alert-danger"><?php echo htmlspecialchars($error_message); ?></div>
+    <?php endif; ?>
+    
+    <?php if(!empty($success_message)): ?>
+        <div class="alert alert-success"><?php echo htmlspecialchars($success_message); ?></div>
+    <?php endif; ?>
     
     <form action="login.php" method="POST" id="loginForm">
       <!-- Email -->
@@ -76,4 +82,17 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
       </div>
     </form>
   </div>
+
+  <?php 
+    // Render toast script and show messages
+    renderToastScript();
+    
+    if(!empty($error_message)) {
+        showToastMessage($error_message, 'error');
+    }
+    
+    if(!empty($success_message)) {
+        showToastMessage($success_message, 'success');
+    }
+  ?>
 
